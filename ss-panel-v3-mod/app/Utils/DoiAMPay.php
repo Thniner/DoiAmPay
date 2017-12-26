@@ -1,10 +1,8 @@
 <?php
 namespace App\Utils;
 /**
- * Made By Leo
- * 黛米付接口
- * 2.1.4版本
- * 适用于 V1 API  黛米付面板V1
+ * Jiuling
+ * Test Payjs v1.0
  * copyright all rights reserved
  */
 
@@ -51,25 +49,13 @@ class DoiAMPay{
 
     protected $enabled = [
         'wepay'=>1, // 1 启用 0 关闭
-        'alipay'=>1, // 1 启用 0 关闭
-        'qqpay'=>1, // 1 启用 0 关闭
         ];
 
     protected $data = [
         'wepay'=>[
             'mchid' => 1511606484,   // 商户号
-            'phone' => 17088884666, //手机号
             'token' => "IWDxq5wILmuWZEQKj1hEFFsHXBAotsD8" // 安全验证码
-        ],
-        'alipay'=>[
-            'mchid' => 1511606511,   // 商户号
-            'phone' => 17088884666, //手机号
-            'token' => "bDtPDQwi76RQO3ISnDryrk9Hbe3SsAkQ" // 安全验证码
-        ],
-        'qqpay'=>[
-            'mchid' => 1511606539,   // 商户号
-            'phone' => 17088884666, //手机号
-            'token' => "yKgdXms8n4HS8DGW5YmItOxSwzsw3lmz" // 安全验证码
+            'callback' => ""
         ],
     ];
 
@@ -109,15 +95,14 @@ class DoiAMPay{
         $pl->total = $price;
         $pl->save();
         $data = [
-            'trade' => $pl->id,
-            'price' => $price,
-            'phone' => $settings['phone'],
+            'out_trade_no' => $pl->id,
+            'total_fee' => $price,
             'mchid' => $settings['mchid'],
-            'subject' => Config::get("appName")."充值".$price."元",
             'body' => Config::get("appName")."充值".$price."元",
+            'notify_url' => $settings['callback']
         ];
         $data = DoiAM::sign($data,$settings['token']);
-        $ret = DoiAM::post("https://api.daimiyun.cn/v2/".$type."/create",$data);
+        $ret = DoiAM::post("https://payjs.cn/api/native,$data);
         $result = json_decode($ret,true);
         if($result and $result['errcode']==0){
             $result['pid']=$pl->id;
@@ -145,10 +130,10 @@ HTML;
     }
     public function handel_callback($request, $response, $args){
         $order_data = $_POST;
-        $status    = $order_data['status'];         //获取传递过来的交易状态
+        $status    = $order_data['return_code'];         //获取传递过来的交易状态
         $invoiceid = $order_data['out_trade_no'];     //订单号
-        $transid   = $order_data['trade_no'];       //转账交易号
-        $amount    = $order_data['money'];          //获取递过来的总价格
+        $transid   = $order_data['payjs_order_id'];       //转账交易号
+        $amount    = $order_data['total_fee'];          //获取递过来的总价格
         if(!DoiAM::checksign($_POST,$this->data[$args['type']]['token'])){
             return (json_encode(array('errcode'=>2333)));
         }
@@ -174,10 +159,8 @@ class DoiAM{
     }
     public static function getsign($array,$key){
         unset($array['sign']);
-        self::sort($array);
-        $sss=http_build_query($array);
-        $sign=hash("sha256",$sss.$key);
-        $sign=sha1($sign.hash("sha256",$key));
+        ksort($array);
+        $sign = strtoupper(md5(urldecode(http_build_query($array)).'&key='.$key));
         return $sign;
     }
     public static function sign($array,$key){
