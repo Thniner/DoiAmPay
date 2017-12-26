@@ -55,7 +55,7 @@ class WePayjs{
         'wepay'=>[
             'mchid' => 1511606484,   // 商户号
             'token' => "IWDxq5wILmuWZEQKj1hEFFsHXBAotsD8" // 安全验证码
-            'callback' => ""
+            'callback' => "https://您的域名/payjs/callback/wepay"
         ],
     ];
 
