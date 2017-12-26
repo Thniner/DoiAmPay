@@ -23,16 +23,6 @@
 														<a class="waves-attach waves-effect type" data-toggle="tab" href="#" data-pay="wepay">微信支付</a>
 													</li>
 												{/if}
-												{if $enabled['alipay']}
-													<li{if $enabled['wepay']==0} class="active" {/if}>
-														<a class="waves-attach waves-effect type" data-toggle="tab" href="#" data-pay="alipay">支付宝</a>
-													</li>
-												{/if}
-												{if $enabled['qqpay']}
-													<li{if $enabled['wepay']==0 and $enabled['alipay']==0} class="active" {/if}>
-														<a class="waves-attach waves-effect type" data-toggle="tab" href="#" data-pay="qqpay">QQ支付</a>
-													</li>
-												{/if}
 											</ul>
 											<div class="tab-nav-indicator"></div>
 										</nav>
