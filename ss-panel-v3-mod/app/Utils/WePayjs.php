@@ -45,7 +45,7 @@ use App\Utils\Pay;
 use App\Utils\URL;
 use App\Services\Mail;
 
-class DoiAMPay{
+class WePayjs{
 
     protected $enabled = [
         'wepay'=>1, // 1 启用 0 关闭
@@ -101,8 +101,8 @@ class DoiAMPay{
             'body' => Config::get("appName")."充值".$price."元",
             'notify_url' => $settings['callback']
         ];
-        $data = DoiAM::sign($data,$settings['token']);
-        $ret = DoiAM::post("https://payjs.cn/api/native,$data);
+        $data = Payjs::sign($data,$settings['token']);
+        $ret = Payjs::post("https://payjs.cn/api/native,$data);
         $result = json_decode($ret,true);
         if($result and $result['errcode']==0){
             $result['pid']=$pl->id;
@@ -123,7 +123,7 @@ class DoiAMPay{
          echo "您已经成功支付 $money 元,正在跳转..";
          echo <<<HTML
 <script>
-    location.href="/user/doiam";
+    location.href="/user/payjs";
 </script>
 HTML;
         return;
@@ -134,7 +134,7 @@ HTML;
         $invoiceid = $order_data['out_trade_no'];     //订单号
         $transid   = $order_data['payjs_order_id'];       //转账交易号
         $amount    = $order_data['total_fee'];          //获取递过来的总价格
-        if(!DoiAM::checksign($_POST,$this->data[$args['type']]['token'])){
+        if(!Payjs::checksign($_POST,$this->data[$args['type']]['token'])){
             return (json_encode(array('errcode'=>2333)));
         }
         if ($status == 'success') {
@@ -153,7 +153,7 @@ HTML;
         }
     }
 }
-class DoiAM{
+class Payjs{
     public static function sort(&$array){
         ksort($array);
     }
